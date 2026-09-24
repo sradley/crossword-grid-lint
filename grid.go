@@ -4,10 +4,19 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
-// Grid is the block/white layout of a crossword, before any letters are
-// filled in. '#' marks a black square, '.' marks a white (fillable) square.
+// isLetter reports whether ch is an ASCII letter. Grid cells are indexed
+// byte-by-byte (see isBlack), so only single-byte runes are valid fill.
+func isLetter(ch rune) bool {
+	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')
+}
+
+// Grid is the block/white layout of a crossword. '#' marks a black square;
+// everything else is a white square, either '.' for empty or a letter if
+// the grid has been filled in. The checks in this package only care about
+// black vs. white, so a filled grid and an empty one report the same way.
 type Grid struct {
 	Cells  []string
 	Width  int
@@ -15,8 +24,9 @@ type Grid struct {
 }
 
 // LoadGrid reads a grid from a plain text file: one row per line, using
-// '#' for black squares and '.' for white squares. Blank lines are skipped
-// so a trailing newline at end of file doesn't turn into a phantom row.
+// '#' for black squares, '.' for empty white squares, and letters for
+// filled-in white squares. Blank lines are skipped so a trailing newline
+// at end of file doesn't turn into a phantom row.
 func LoadGrid(path string) (*Grid, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -46,10 +56,11 @@ func LoadGrid(path string) (*Grid, error) {
 			return nil, fmt.Errorf("%s: row %d has length %d, expected %d (rows must line up)", path, i+1, len(row), width)
 		}
 		for _, ch := range row {
-			if ch != '#' && ch != '.' {
-				return nil, fmt.Errorf("%s: row %d contains %q, only '#' and '.' are allowed", path, i+1, ch)
+			if ch != '#' && ch != '.' && !isLetter(ch) {
+				return nil, fmt.Errorf("%s: row %d contains %q, only '#', '.', and letters are allowed", path, i+1, ch)
 			}
 		}
+		rows[i] = strings.ToUpper(row)
 	}
 
 	return &Grid{Cells: rows, Width: width, Height: len(rows)}, nil

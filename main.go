@@ -12,8 +12,9 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [flags] <grid-file>\n\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Checks a crossword grid's block layout: rotational symmetry, word")
-		fmt.Fprintln(os.Stderr, "numbering, and word lengths. The grid file is plain text, '#' for")
-		fmt.Fprintln(os.Stderr, "black squares and '.' for white squares, one row per line.")
+		fmt.Fprintln(os.Stderr, "numbering, and word lengths. The grid file is plain text, one row")
+		fmt.Fprintln(os.Stderr, "per line: '#' for black squares, '.' for empty white squares, and")
+		fmt.Fprintln(os.Stderr, "letters for a filled-in grid.")
 		fmt.Fprintln(os.Stderr, "\nflags:")
 		flag.PrintDefaults()
 	}

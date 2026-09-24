@@ -11,12 +11,16 @@ from a plain text file and reports whether it holds up, either as text you
 can read or as JSON you can feed into something else.
 
 It only looks at grid structure right now - black/white layout, symmetry,
-numbering, word lengths. It doesn't know about letters, clues, or fill.
+numbering, word lengths. It doesn't know about clues, and it doesn't check
+that fill is a real word - it just needs to tell black squares from white
+ones.
 
 ## Grid file format
 
-One line per row. `#` is a black square, `.` is a white square. Rows must
-all be the same length.
+One line per row. `#` is a black square. A white square is either `.` for
+empty or a letter if the grid has been filled in - the checks in this
+package only care about black vs. white, so a filled grid and an empty one
+report the same way. Rows must all be the same length.
 
 ```
 ..#..
@@ -75,6 +79,10 @@ Rows and columns are 0-indexed in the JSON output, matching normal array
 indexing, and 1-indexed in the text output, matching how a solver would
 point at a square on paper.
 
+A filled-in grid works the same way - see `testdata/filled.txt` for an
+example. Letters are accepted case-insensitively and normalized to
+uppercase; they don't affect symmetry or numbering, only `#` does.
+
 ## Flags
 
 ```
@@ -92,6 +100,6 @@ go build .
 
 ## Status
 
-Early. See the issue tracker for what's planned next - letter fill,
-unchecked-square detection, and reading grids from stdin are the near-term
-targets.
+Early. See the issue tracker for what's planned next - unchecked-square
+detection, reading grids from stdin, and a `.puz` format reader are the
+near-term targets.
