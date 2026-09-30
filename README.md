@@ -47,7 +47,12 @@ words shorter than 3 cells:
   4-down at row 1, col 5 (length 2)
   8-down at row 4, col 1 (length 2)
   9-down at row 4, col 5 (length 2)
+no unchecked squares
 ```
+
+An unchecked square is a white square that sits in a word in only one
+direction, so the solver has no crossing entry to help with it. Squares
+with no word through them at all are not counted.
 
 ## JSON output
 
@@ -71,7 +76,8 @@ $ go run . --json testdata/sample.txt
   "short_words": [
     { "number": 1, "direction": "across", "row": 0, "col": 0, "length": 2 },
     ...
-  ]
+  ],
+  "unchecked_squares": []
 }
 ```
 
@@ -100,6 +106,5 @@ go build .
 
 ## Status
 
-Early. See the issue tracker for what's planned next - unchecked-square
-detection, reading grids from stdin, and a `.puz` format reader are the
+Early. Reading grids from stdin and a `.puz` format reader are the
 near-term targets.

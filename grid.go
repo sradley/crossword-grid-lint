@@ -128,6 +128,38 @@ func (g *Grid) Words() []Word {
 	return words
 }
 
+// Cell is a 0-indexed grid position.
+type Cell struct {
+	Row int `json:"row"`
+	Col int `json:"col"`
+}
+
+// inRun reports whether (r, c) is part of a word of two or more cells in the
+// direction (dr, dc). A lone white square between blacks isn't a word, which
+// is why this isn't just a check on the cell itself.
+func (g *Grid) inRun(r, c, dr, dc int) bool {
+	if g.isBlack(r, c) {
+		return false
+	}
+	return !g.isBlack(r-dr, c-dc) || !g.isBlack(r+dr, c+dc)
+}
+
+// Unchecked returns the white squares that belong to a word in only one
+// direction, so a solver can't cross-check them. Squares in no word at all
+// (isolated between blacks) are not listed; they're a different problem and
+// show up as missing numbering.
+func (g *Grid) Unchecked() []Cell {
+	var cells []Cell
+	for r := 0; r < g.Height; r++ {
+		for c := 0; c < g.Width; c++ {
+			if g.inRun(r, c, 0, 1) != g.inRun(r, c, 1, 0) {
+				cells = append(cells, Cell{Row: r, Col: c})
+			}
+		}
+	}
+	return cells
+}
+
 // runLength counts consecutive white cells starting at (r, c) and moving
 // by (dr, dc) each step, until a black square or the edge is hit.
 func runLength(g *Grid, r, c, dr, dc int) int {

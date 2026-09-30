@@ -17,6 +17,7 @@ type Report struct {
 	MinWordLen   int    `json:"min_word_length"`
 	Words        []Word `json:"words"`
 	ShortWords   []Word `json:"short_words"`
+	Unchecked    []Cell `json:"unchecked_squares"`
 }
 
 // BuildReport runs every check against g and collects the results. minWordLen
@@ -40,6 +41,12 @@ func BuildReport(g *Grid, minWordLen int) *Report {
 		}
 	}
 
+	unchecked := g.Unchecked()
+	if unchecked == nil {
+		// Encode as [] rather than null in JSON.
+		unchecked = []Cell{}
+	}
+
 	total := g.Width * g.Height
 	return &Report{
 		Width:        g.Width,
@@ -50,6 +57,7 @@ func BuildReport(g *Grid, minWordLen int) *Report {
 		MinWordLen:   minWordLen,
 		Words:        words,
 		ShortWords:   short,
+		Unchecked:    unchecked,
 	}
 }
 
@@ -74,11 +82,20 @@ func (rep *Report) PrintHuman(w io.Writer) {
 
 	if len(rep.ShortWords) == 0 {
 		fmt.Fprintf(w, "no words shorter than %d cells\n", rep.MinWordLen)
+	} else {
+		fmt.Fprintf(w, "words shorter than %d cells:\n", rep.MinWordLen)
+		for _, wd := range rep.ShortWords {
+			fmt.Fprintf(w, "  %d-%s at row %d, col %d (length %d)\n", wd.Number, wd.Direction, wd.Row+1, wd.Col+1, wd.Length)
+		}
+	}
+
+	if len(rep.Unchecked) == 0 {
+		fmt.Fprintln(w, "no unchecked squares")
 		return
 	}
-	fmt.Fprintf(w, "words shorter than %d cells:\n", rep.MinWordLen)
-	for _, wd := range rep.ShortWords {
-		fmt.Fprintf(w, "  %d-%s at row %d, col %d (length %d)\n", wd.Number, wd.Direction, wd.Row+1, wd.Col+1, wd.Length)
+	fmt.Fprintln(w, "unchecked squares (in only one word):")
+	for _, cell := range rep.Unchecked {
+		fmt.Fprintf(w, "  row %d, col %d\n", cell.Row+1, cell.Col+1)
 	}
 }
 
